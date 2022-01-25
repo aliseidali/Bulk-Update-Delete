@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c7a26260-fb79-4017-a7a7-dc110b2e90bf" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="15b40f62-c75e-4ce5-b590-f7a61df73a7d" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" />
+	</db:config>
+	<flow name="foreachFlow" doc:id="9b7456ad-b20d-425d-99d3-5797d6035f54" >
+		<http:listener doc:name="Listener" doc:id="0b088d5e-0ac8-4584-9138-8fea8efee90f" config-ref="HTTP_Listener_config" path="/foreach"/>
+		<ee:transform doc:name="Transform Message" doc:id="7e58a61f-dc2c-4c6f-9886-100626fb36b4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+---
+
+[
+    {
+     "pID" : 1, 
+     "name" : "Lenovo",
+     "price": 3456,
+     "description" : "Lenovo ThinkPad",
+     "video_url" : "www.lenvothinkpad.com"
+
+    },
+
+    {
+        "pID" : 2, 
+        "name" : "MACBook Pro",
+        "price": 5665,
+        "description" : "MACBook Pro",
+        "video_url" : "www.MACBookPro.com"
+   
+       },
+    {
+        "pID" : 3, 
+        "name" : "DELL",
+        "price": 6888,
+        "description" : "Dell ",
+        "video_url" : "www.dell.com"
+   
+       },
+   
+       {
+           "pID" : 4, 
+           "name" : "HP",
+           "price": 2333,
+           "description" : "HP",
+           "video_url" : "www.hp.com"
+      
+   }
+]
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4d4d0f13-3c2e-47fd-8abf-fc0f62a1e98c" message="#[payload]"/>
+		<foreach doc:name="For Each" doc:id="21a05b03-b561-4106-adfd-ab8f6fb4d296" >
+			<logger level="INFO" doc:name="Logger" doc:id="afa90b32-abaa-48eb-abb3-f714c58bcdd8" message="#[payload]"/>
+		</foreach>
+	</flow>
+	<flow name="foreachFlow1" doc:id="d4625fc2-04d2-462b-94cd-3ff37d065cb1" >
+		<http:listener doc:name="Listener" doc:id="d8443267-e28d-4e49-906b-e791edbd3946" config-ref="HTTP_Listener_config" path="/foreachselect"/>
+		<db:select doc:name="Select" doc:id="586cb932-c3ad-4376-9ce3-550b0586255a" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from amazon.customers;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="5af31986-770a-4cc7-9b69-a36c9aa325ac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="63142cc4-ceca-405c-b933-a3692feabca0">
+			<logger level="INFO" doc:name="Logger" doc:id="0e1cbf70-62c8-4836-8261-25a9711cc08c" message="#[payload]"/>
+		</foreach>
+		<logger level="INFO" doc:name="end of flow" doc:id="748fb598-6b99-486b-b6f2-1cf6c3e1b77a" message="#[payload]"/>
+	</flow>
+</mule>
